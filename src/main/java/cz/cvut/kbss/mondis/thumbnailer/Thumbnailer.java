@@ -116,6 +116,10 @@ public class Thumbnailer  {
         return thumbImg;
     }
 
+    /*
+    Example command line:
+    ffmpeg -i /tmp/thumbnailer-downloader4919221186540797301.mp4 -s 100X100 -ss 00:00:01.00 -vcodec mjpeg -vframes 1 -f image2 /tmp/thumbnailer-videothumb1266500720689049848.jpg
+     */
     public BufferedImage createVideoThumbnail(File vid) throws IOException {
         String pathToSrcFile = vid.getAbsolutePath();
         File tempThumbFile = File.createTempFile("thumbnailer-videothumb", ".jpg");
@@ -130,7 +134,9 @@ public class Thumbnailer  {
                 "-vcodec","mjpeg",
                 "-vframes","1",
                 "-f","image2",
-                tempFilePath);
+                tempFilePath,
+                "-y" // force overwrite temp file...
+        );
 
         pb.redirectErrorStream(true);
 
@@ -147,11 +153,13 @@ public class Thumbnailer  {
             p.waitFor();
             // reload the generated thumbnail
             BufferedImage thumb = ImageIO.read(tempThumbFile);
-            tempThumbFile.delete();
             return thumb;
         }
         catch(Exception ex) {
             log.error(ex);
+        }
+        finally {
+            tempThumbFile.delete();
         }
         return null;
 
