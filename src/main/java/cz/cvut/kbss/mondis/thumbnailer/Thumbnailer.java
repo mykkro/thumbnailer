@@ -88,24 +88,34 @@ public class Thumbnailer  {
             } else if (downloadedFile.type.equals("video")) {
                 out = createVideoThumbnail(downloadedFile.getFile());
                 return out;
+            } else if (downloadedFile.type.equals("audio")) {
+                out = createAudioThumbnail(downloadedFile.getFile());
+                return out;
             } else {
                 // unknown media type...
-                return null;
             }
         }
         catch(Exception e) {
             log.error(e);
-            return null;
         }
         finally {
             if(downloadedFile != null) {
                 downloadedFile.delete();
             }
         }
+        if(out == null) {
+            try {
+                // create default thumbnail for all other file types
+                out = createUnknownThumbnail();
+            }
+            catch(IOException e) {
+                log.error(e);
+            }
+        }
+        return out;
     }
 
-    public BufferedImage createImageThumbnail(File imgFile) throws IOException {
-        BufferedImage img = ImageIO.read(imgFile);
+    private BufferedImage scaleImage(BufferedImage img) {
         BufferedImage thumbImg = Scalr.resize(
                 img,
                 Scalr.Method.QUALITY,
@@ -114,6 +124,21 @@ public class Thumbnailer  {
                 this.thumbHeight,
                 Scalr.OP_ANTIALIAS);
         return thumbImg;
+    }
+
+    public BufferedImage createImageThumbnail(File imgFile) throws IOException {
+        BufferedImage img = ImageIO.read(imgFile);
+        return scaleImage(img);
+    }
+
+    public BufferedImage createAudioThumbnail(File soundFile) throws IOException {
+        BufferedImage img = ImageIO.read(Thumbnailer.class.getResource("type-sound.jpg"));
+        return scaleImage(img);
+    }
+
+    public BufferedImage createUnknownThumbnail() throws IOException {
+        BufferedImage img = ImageIO.read(Thumbnailer.class.getResource("type-unknown.jpg"));
+        return scaleImage(img);
     }
 
     /*
@@ -165,12 +190,45 @@ public class Thumbnailer  {
 
     }
 
+    public String checkFFMPEGVersion() throws IOException {
+        ProcessBuilder pb = new ProcessBuilder(
+                ffmpegCommand,
+                "-version"
+        );
+
+        pb.redirectErrorStream(true);
+        try {
+            Process p = pb.start();
+            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            // consume output...
+            String line = null;
+            String firstLine = null;
+            while ((line = br.readLine()) != null) {
+                if(firstLine == null) firstLine = line;
+                //System.out.println("---------" + line);
+            }
+            p.waitFor();
+            return firstLine.startsWith("ffmpeg version") ? firstLine.replaceFirst("ffmpeg version ", "") : null;
+        }
+        catch(Exception ex) {
+            log.error(ex);
+        }
+        return null;
+
+    }
+
     /* do something... */
     public static void main(String[] args) throws Exception {
         //URL url = new URL("http://www.w3schools.com/html/mov_bbb.ogg");
-        URL url = new URL("http://mtgcommander.net/images/Daretti,%20Scrap%20Savant.jpg");
+        //URL url = new URL("http://mtgcommander.net/images/Daretti,%20Scrap%20Savant.jpg");
+        //URL url = new URL("https://archive.org/download/testmp3testfile/mpthreetest.mp3");
+        //URL url = new URL("https://www.google.com");
+        //URL url = new URL("http://upload.wikimedia.org/wikipedia/en/4/45/ACDC_-_Back_In_Black-sample.ogg");
+        URL url = new URL("http://static2.wikia.nocookie.net/__cb20130812053539/houseofnight/images/8/8b/Cats.jpg");
         final Properties properties = Thumbnailer.getDefaultProperties();
         Thumbnailer tb = Thumbnailer.fromProperties(properties);
+        String version = tb.checkFFMPEGVersion();
+        System.out.println("FFMPEG available: "+version);
         BufferedImage img = tb.getThumbnail(url);
         LogFactory.getLog(Thumbnailer.class).info("Generated thumbnail");
     }

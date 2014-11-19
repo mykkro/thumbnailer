@@ -46,4 +46,12 @@ public class DownloaderTest {
         DownloadedFile dfile = dl.downloadFile(url);
         dfile.delete();
     }
+
+    public void testDownloadAudioFile() throws Exception {
+        URL url = new URL("https://archive.org/download/testmp3testfile/mpthreetest.mp3");
+        DownloadedFile dfile = dl.downloadFile(url);
+        assertEquals("The MIME type should be audio/mpeg", dfile.getMimeType(), "audio/mpeg");
+        dfile.delete();
+    }
+
 }
