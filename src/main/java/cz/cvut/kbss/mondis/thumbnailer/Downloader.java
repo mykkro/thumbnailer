@@ -34,6 +34,7 @@ public class Downloader {
 
     // Maximum allowed file size (10M)
     public final int MAX_FILE_SIZE;
+    public final String TEMP_FILE_PREFIX = "thumbnailer-downloader";
 
     public Downloader(int maxFileSize) {
         this.MAX_FILE_SIZE = maxFileSize;
@@ -49,7 +50,7 @@ public class Downloader {
         // keep the file extension...
         String uri = url.toURI().toASCIIString();
         String extension = uri.substring(uri.lastIndexOf("."));
-        File f = File.createTempFile("thumbnailer-downloader", extension);
+        File f = File.createTempFile(TEMP_FILE_PREFIX, extension);
         return downloadFile(url, f);
     }
 
@@ -193,7 +194,8 @@ public class Downloader {
                 "video/quicktime",
                 "video/mp4",
                 "video/mpeg",
-                "video/x-ms-wmv"
+                "video/x-ms-wmv",
+                "video/x-msvideo"
         };
         for(String mt : mimetypes) {
             if(mt.equals(mimetype)) return true;

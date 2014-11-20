@@ -23,13 +23,13 @@ public class ThumbnailCache {
 
     /**
      * Helper method to convert thumbnail key (URL) to its path.
-     * @param url
+     * @param key
      * @return
      */
-    String urlToPath(URL url) {
+    String keyToPath(String key) {
         String filename="";
         try {
-            filename = URLEncoder.encode(url.toString(), "UTF-8");
+            filename = URLEncoder.encode(key, "UTF-8");
         }
         catch(UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -40,11 +40,11 @@ public class ThumbnailCache {
     /**
      * Retrieves a thumbnail from cache by its key. Returns null if no thumbnail found.
      *
-     * @param url
+     * @param key
      * @return
      */
-    public BufferedImage getThumbnail(URL url) {
-        File f = new File(urlToPath(url));
+    public BufferedImage getThumbnail(String key) {
+        File f = new File(keyToPath(key));
         BufferedImage thumb = null;
         if(f.isFile()) {
             try {
@@ -63,31 +63,31 @@ public class ThumbnailCache {
     /**
      * Checks if cache contains a thumbnail with a given key.
      *
-     * @param url
+     * @param key
      * @return
      */
-    public boolean hasThumbnail(URL url) {
-        File f = new File(urlToPath(url));
+    public boolean hasThumbnail(String key) {
+        File f = new File(keyToPath(key));
         return f.isFile();
     }
 
     /**
      * Stores thumbnail to cache. Thumbnail is saved as a JPG file.
      *
-     * @param url the key
+     * @param key the key
      * @param thumbnail the image
      */
-    public void putThumbnail(URL url, BufferedImage thumbnail) throws IOException {
-        File f = new File(urlToPath(url));
+    public void putThumbnail(String key, BufferedImage thumbnail) throws IOException {
+        File f = new File(keyToPath(key));
         ImageIO.write(thumbnail, "jpg", f);
     }
 
     /**
      * Deletes thumbnail from cache.
-     * @param url
+     * @param key
      */
-    public void removeThumbnail(URL url) {
-        File f = new File(urlToPath(url));
+    public void removeThumbnail(String key) {
+        File f = new File(keyToPath(key));
         f.delete();
     }
 
