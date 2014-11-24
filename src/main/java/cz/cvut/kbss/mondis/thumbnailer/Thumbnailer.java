@@ -191,7 +191,7 @@ public class Thumbnailer  {
         ProcessBuilder pb = new ProcessBuilder(
                 ffmpegCommand,
                 "-i",pathToSrcFile,
-                "-filter:v",filter,
+                //"-filter:v",filter,  --> older FFMPEGs do not recognize this options, so it is better to do full snapshot and use imgscalr to create a thumnnail from this snapshot
                 "-ss","00:00:01.00",
                 "-vcodec","mjpeg",
                 "-vframes","1",
@@ -213,9 +213,9 @@ public class Thumbnailer  {
                 //System.out.println("---------" + line);
             }
             p.waitFor();
-            // reload the generated thumbnail
-            BufferedImage thumb = ImageIO.read(tempThumbFile);
-            return thumb;
+            // generate thumbnail from screenshot...
+            BufferedImage img = ImageIO.read(tempThumbFile);
+            return scaleImage(img, tp);
         }
         catch(Exception ex) {
             log.error(ex);
@@ -257,8 +257,8 @@ public class Thumbnailer  {
     /* do something... */
     public static void main(String[] args) throws Exception {
         //URL url = new URL("http://www.w3schools.com/html/mov_bbb.ogg");
-        //URL url = new URL("http://techslides.com/demos/sample-videos/small.webm");
-        URL url = new URL("https://ia600504.us.archive.org/16/items/AppleComputersQuicktimeSample/sample.mp4");
+        /**/URL url = new URL("http://techslides.com/demos/sample-videos/small.webm");
+        //URL url = new URL("https://ia600504.us.archive.org/16/items/AppleComputersQuicktimeSample/sample.mp4");
         //URL url = new URL("http://www.engr.colostate.edu/me/facil/dynamics/files/drop.avi");
         //URL url = new URL("http://mtgcommander.net/images/Daretti,%20Scrap%20Savant.jpg");
         //URL url = new URL("https://archive.org/download/testmp3testfile/mpthreetest.mp3");
